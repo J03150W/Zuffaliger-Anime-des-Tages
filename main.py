@@ -5,6 +5,19 @@ from datetime import date
 import urllib.request
 from PIL import Image
 import yagmail
+import os
+from dotenv import load_dotenv
+from ftplib import FTP
+
+# getting environment variables
+load_dotenv()
+user = os.getenv("USER")
+app_password = os.getenv("APP_PASSWORD")
+to = os.getenv("TO")
+
+ftp_address = os.getenv("FTP_ADDRESS")
+ftp_username = os.getenv("FTP_USERNAME")
+ftp_password = os.getenv("FTP_PASSWORD")
 
 
 # request to api
@@ -12,7 +25,6 @@ inappropriate = 1
 while inappropriate == 1:
     url = "https://api.jikan.moe/v4/random/anime"
     r = requests.get(url=url)
-
     # konfiguration of data
     resData = r.json()["data"]
     genres = []
@@ -25,7 +37,8 @@ while inappropriate == 1:
         "genres": genres,
         "synopsis": resData["synopsis"]
     }
-    if not data["genres"] == "Hentai":
+
+    if "Hentai" not in data["genres"]:
         inappropriate = 0
 
 # generating of pdf
@@ -45,14 +58,20 @@ today = date.today()
 pdf_name = "random_anime_of_" + str(today) + ".pdf"
 pdf.output(pdf_name)
 
-# generating email
-user = "joelsow247@gmail.com"
-app_password = "hhqdorjsbltycuih"
-to = "joelsow247@gmail.com"
-
+# sending email
 subject = "random anime of the day"
 content = ["this is the random anime of " + str(today), pdf_name]
 
 with yagmail.SMTP(user, app_password) as yag:
     yag.send(to, subject, content)
-    print("Sent email successfully")
+    print("Sent email successfully at " + str(today))
+
+# upload pdf to ftp
+with FTP(host=ftp_address) as ftp:
+    ftp.login(user=ftp_username, passwd=ftp_password)
+
+    with open(pdf_name, 'rb') as file:
+        ftp.storbinary('STOR ' + "www/" + pdf_name, file)
+        ftp.quit()
+
+print("Script executed successfully at " + str(today))
