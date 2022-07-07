@@ -8,6 +8,7 @@ import yagmail
 import os
 from dotenv import load_dotenv
 from ftplib import FTP
+import logging
 
 # getting environment variables
 load_dotenv()
@@ -21,8 +22,8 @@ ftp_password = os.getenv("FTP_PASSWORD")
 
 
 # request to api
-inappropriate = 1
-while inappropriate == 1:
+isInappropriate = True
+while isInappropriate:
     url = "https://api.jikan.moe/v4/random/anime"
     r = requests.get(url=url)
     # konfiguration of data
@@ -39,17 +40,16 @@ while inappropriate == 1:
     }
 
     if "Hentai" not in data["genres"]:
-        inappropriate = 0
+        isInappropriate = False
 
 # generating of pdf
 pdf = FPDF()
 pdf.add_page()
 pdf.set_font("Arial", size=15)
 urllib.request.urlretrieve(data["image"], "image.jpg")
-image = Image.open(
-    r"C:\Lehre\TBZ\Modul-122\LB2\Projekt\Modul-122_LB2\image.jpg")
-image.save(r"C:\Lehre\TBZ\Modul-122\LB2\Projekt\Modul-122_LB2\image.png")
-pdf.image(name="C:\Lehre\TBZ\Modul-122\LB2\Projekt\Modul-122_LB2\image.png")
+image = Image.open(r"image.jpg")
+image.save(r"image.png")
+pdf.image(name="image.png")
 pdf.cell(200, 10, txt="Title: " + data["title"], ln=1, align="L")
 pdf.cell(200, 10, txt="Episodes: " + str(data["episodes"]), ln=1, align="L")
 pdf.cell(200, 10, txt="Genres: " + ", ".join(data["genres"]), ln=1, align="L")
@@ -64,7 +64,7 @@ content = ["this is the random anime of " + str(today), pdf_name]
 
 with yagmail.SMTP(user, app_password) as yag:
     yag.send(to, subject, content)
-    print("Sent email successfully at " + str(today))
+    logging.info("Sent email successfully at " + str(today))
 
 # upload pdf to ftp
 with FTP(host=ftp_address) as ftp:
@@ -73,5 +73,7 @@ with FTP(host=ftp_address) as ftp:
     with open(pdf_name, 'rb') as file:
         ftp.storbinary('STOR ' + "www/" + pdf_name, file)
         ftp.quit()
+        logging.info(
+            "PDF is uploaded to FTP server successfully at " + str(today))
 
-print("Script executed successfully at " + str(today))
+logging.info("Script executed successfully at " + str(today))
