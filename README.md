@@ -104,6 +104,3 @@ with FTP(host=ftp_address) as ftp:
 
 ## Reflexion
 Ich bin zufriden mit dem Resultat meines Projektes. Da ich am Anfang einige Probleme hatte, habe ich viel Zeit verloren. Aus diesem Grund denke ich, dass ich besseren Code schreiben hätte können.
-
-## Schätzung der Note
-Da ich nicht gerade der schönste Code oder die beste Dekumentation geschrieben habe, dafür die Anforderungen für das Projekt trozdem erfüllt habe, denke ich, dass ich eine 4.5 in dieser Projektarbeit erhalten werde. Dabei könnte ich mich aber auch täuschen, da ich mir nicht sicher sind, ob ich die Dokumentation im richtigen Format geschrieben habe.
